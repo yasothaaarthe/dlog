@@ -6,11 +6,11 @@ import 'dlog_text_styles.dart';
 class DLogTheme {
   DLogTheme._();
 
-  static ThemeData darkTheme = ThemeData(
+  static ThemeData get darkTheme => ThemeData(
     brightness: Brightness.dark,
     scaffoldBackgroundColor: DLogColors.black,
 
-    colorScheme: const ColorScheme.dark(
+    colorScheme: ColorScheme.dark(
       primary: DLogColors.burgundyBright,
       secondary: DLogColors.silver,
       surface: DLogColors.card,
@@ -21,14 +21,14 @@ class DLogTheme {
       onError: DLogColors.white,
     ),
 
-    appBarTheme: const AppBarTheme(
+    appBarTheme: AppBarTheme(
       backgroundColor: DLogColors.transparent,
       foregroundColor: DLogColors.white,
       elevation: 0,
       centerTitle: false,
     ),
 
-    textTheme: const TextTheme(
+    textTheme: TextTheme(
       displayLarge: DLogTextStyles.display,
       headlineLarge: DLogTextStyles.heading,
       titleLarge: DLogTextStyles.subheading,
@@ -84,5 +84,57 @@ class DLogTheme {
         textStyle: DLogTextStyles.button,
       ),
     ),
+  );
+
+  static ThemeData get lightTheme => darkTheme.copyWith(
+    brightness: Brightness.light,
+    scaffoldBackgroundColor: const Color(0xFFF7F4F5),
+    colorScheme: ColorScheme.light(
+      primary: DLogColors.burgundyBright,
+      secondary: DLogColors.burgundy,
+      surface: Colors.white,
+      error: DLogColors.warningRed,
+      onPrimary: Colors.white,
+      onSecondary: Colors.white,
+      onSurface: const Color(0xFF211B1E),
+      onError: Colors.white,
+    ),
+    textTheme: darkTheme.textTheme.apply(
+      bodyColor: const Color(0xFF51484C),
+      displayColor: const Color(0xFF211B1E),
+    ),
+    appBarTheme: AppBarTheme(
+      backgroundColor: DLogColors.transparent,
+      foregroundColor: const Color(0xFF211B1E),
+      elevation: 0,
+      centerTitle: false,
+    ),
+    inputDecorationTheme: darkTheme.inputDecorationTheme.copyWith(
+      fillColor: Colors.white,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Color(0xFFD2C9CD), width: 0.7),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: DLogColors.burgundyBright, width: 1.2),
+      ),
+      hintStyle: const TextStyle(color: Color(0xFF71666B)),
+      labelStyle: const TextStyle(color: Color(0xFF71666B)),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: DLogColors.burgundyBright,
+        foregroundColor: Colors.white,
+        minimumSize: const Size(double.infinity, 54),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+        textStyle: DLogTextStyles.button.copyWith(color: Colors.white),
+      ),
+    ),
+    dialogTheme: const DialogThemeData(backgroundColor: Colors.white),
+    bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.white),
   );
 }

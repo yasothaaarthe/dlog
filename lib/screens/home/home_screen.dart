@@ -14,6 +14,7 @@ import '../../services/maintenance_status_service.dart';
 import '../../repositories/vehicle_repository.dart';
 
 import '../../theme/dlog_colors.dart';
+import '../../theme/dlog_theme_controller.dart';
 
 import '../../theme/maintenance_status_style.dart';
 
@@ -62,6 +63,10 @@ class _HomeScreenState extends State<HomeScreen> {
   int _demoAlertCount = 0;
 
   bool _demoAlertRunning = false;
+
+  bool _demoAlarmEnabled = true;
+
+  int _demoAlertGeneration = 0;
 
   bool _homeRefreshing = false;
 
@@ -493,6 +498,58 @@ class _HomeScreenState extends State<HomeScreen> {
                       height: 1.5,
                       fontWeight: FontWeight.w700,
                     ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF17191B),
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(
+                      color: DLogColors.grey.withValues(alpha: 0.22),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        DLogThemeController.instance.isLightMode
+                            ? Icons.light_mode_rounded
+                            : Icons.dark_mode_rounded,
+                        color: DLogColors.burgundyBright,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Light mode',
+                              style: TextStyle(
+                                color: DLogColors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            Text(
+                              'Use a brighter DLog appearance',
+                              style: TextStyle(color: DLogColors.grey, fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ),
+                      StatefulBuilder(
+                        builder: (context, setSheetState) => Switch.adaptive(
+                          value: DLogThemeController.instance.isLightMode,
+                          activeColor: DLogColors.burgundyBright,
+                          onChanged: (enabled) async {
+                            await DLogThemeController.instance.setLightMode(
+                              enabled,
+                            );
+                            if (sheetContext.mounted) setSheetState(() {});
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -1638,36 +1695,37 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(width: 8),
 
-              GestureDetector(
-                onTap: _demoAlertCount >= 3 || _demoAlertRunning
-                    ? null
-                    : () => _runDemoAlert(maintenanceItem: item),
+              Tooltip(
+                message: _demoAlarmEnabled
+                    ? 'Turn demo alarm off'
+                    : 'Turn demo alarm on',
+                child: GestureDetector(
+                  onTap: _toggleDemoAlarm,
+                  behavior: HitTestBehavior.opaque,
+                  child: Container(
+                    width: 46,
 
-                behavior: HitTestBehavior.opaque,
+                    height: 46,
 
-                child: Container(
-                  width: 46,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
 
-                  height: 46,
+                      color: const Color(0xFFFF304A).withValues(alpha: 0.10),
 
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-
-                    color: const Color(0xFFFF304A).withValues(alpha: 0.10),
-
-                    border: Border.all(
-                      color: const Color(0xFFFF5265).withValues(alpha: 0.45),
+                      border: Border.all(
+                        color: const Color(0xFFFF5265).withValues(alpha: 0.45),
+                      ),
                     ),
-                  ),
 
-                  child: Icon(
-                    _demoAlertRunning
-                        ? Icons.notifications_active_rounded
-                        : Icons.notifications_none_rounded,
-
-                    color: const Color(0xFFFF6474),
-
-                    size: 23,
+                    child: Icon(
+                      !_demoAlarmEnabled
+                          ? Icons.notifications_off_rounded
+                          : _demoAlertRunning
+                          ? Icons.notifications_active_rounded
+                          : Icons.notifications_none_rounded,
+                      color: const Color(0xFFFF6474),
+                      size: 23,
+                    ),
                   ),
                 ),
               ),
@@ -1796,7 +1854,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 _demoAlertCount >= 3
                     ? '3 / 3 ALERTS SHOWN'
                     : _demoAlertRunning
-                    ? 'PLAYING ALERT…'
+                    ? _demoAlarmEnabled
+                          ? 'PLAYING ALERT…'
+                          : 'ALERT SHOWN • ALARM OFF'
                     : 'TEST ALERT  •  $_demoAlertCount/3',
 
                 style: const TextStyle(
@@ -1867,9 +1927,31 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Future<void> _toggleDemoAlarm() async {
+    if (!_demoAlarmEnabled) {
+      setState(() => _demoAlarmEnabled = true);
+      return;
+    }
+
+    final wasRunning = _demoAlertRunning;
+    if (wasRunning) ++_demoAlertGeneration;
+    setState(() => _demoAlarmEnabled = false);
+
+    if (!wasRunning) return;
+
+    try {
+      await _demoAudioPlayer.stop();
+    } catch (error) {
+      debugPrint('DLOG DEMO ALARM STOP ERROR: $error');
+    }
+    if (!mounted) return;
+    setState(() => _demoAlertRunning = false);
+  }
+
   Future<void> _runDemoAlert({required String maintenanceItem}) async {
     if (_demoAlertCount >= 3 || _demoAlertRunning || !mounted) return;
 
+    final runGeneration = ++_demoAlertGeneration;
     final tapNumber = _demoAlertCount + 1;
     setState(() {
       _demoAlertCount = tapNumber;
@@ -1890,21 +1972,33 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       final permitted = await _notificationService.requestPermission();
+      if (!mounted || runGeneration != _demoAlertGeneration) return;
       if (permitted) {
         await _notificationService.showDemoAlert(
           tapNumber: tapNumber,
           maintenanceItem: maintenanceItem,
         );
       }
+      if (!mounted || runGeneration != _demoAlertGeneration) return;
 
-      await _demoAudioPlayer.setVolume(1.0);
-      await _demoAudioPlayer.play(AssetSource('audio/grace_period_beep.wav'));
+      if (_demoAlarmEnabled) {
+        await _demoAudioPlayer.setVolume(1.0);
+        if (!mounted ||
+            runGeneration != _demoAlertGeneration ||
+            !_demoAlarmEnabled) {
+          return;
+        }
+        await _demoAudioPlayer.play(AssetSource('audio/grace_period_beep.wav'));
+      }
       await Future<void>.delayed(const Duration(seconds: 15));
-      await _demoAudioPlayer.stop();
+      if (runGeneration != _demoAlertGeneration) return;
+      if (_demoAlarmEnabled) await _demoAudioPlayer.stop();
     } catch (error) {
       debugPrint('DLOG DEMO ALERT ERROR: $error');
     } finally {
-      if (mounted) setState(() => _demoAlertRunning = false);
+      if (mounted && runGeneration == _demoAlertGeneration) {
+        setState(() => _demoAlertRunning = false);
+      }
     }
   }
 

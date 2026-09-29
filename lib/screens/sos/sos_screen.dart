@@ -98,6 +98,26 @@ class _SosScreenState extends State<SosScreen> {
     }
   }
 
+  Future<void> _callContact(EmergencyContact contact) async {
+    final number = contact.phone.replaceAll(RegExp(r'[^0-9+]'), '');
+    if (number.isEmpty) {
+      _showMessage('This emergency contact does not have a valid phone number.');
+      return;
+    }
+
+    final uri = Uri(scheme: 'tel', path: number);
+    try {
+      final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!opened && mounted) {
+        _showMessage('Unable to open the dialer for ${contact.name}.');
+      }
+    } catch (error) {
+      debugPrint('DLOG CONTACT DIALER ERROR: $error');
+      if (!mounted) return;
+      _showMessage('Unable to open the dialer for ${contact.name}.');
+    }
+  }
+
   // ============================================================
   // DLOG APP SUPPORT (not roadside emergency support)
   // ============================================================
@@ -700,37 +720,53 @@ class _SosScreenState extends State<SosScreen> {
       ),
       child: Row(
         children: [
-          Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              color: DLogColors.burgundy.withValues(alpha: 0.16),
-              borderRadius: BorderRadius.circular(13),
-            ),
-            child: const Icon(
-              Icons.person_rounded,
-              color: DLogColors.burgundyBright,
-            ),
-          ),
-          const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  contact.name,
-                  style: const TextStyle(
-                    color: DLogColors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                  ),
+            child: InkWell(
+              onTap: () => _callContact(contact),
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 46,
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: DLogColors.burgundy.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(13),
+                      ),
+                      child: const Icon(
+                        Icons.person_rounded,
+                        color: DLogColors.burgundyBright,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            contact.name,
+                            style: const TextStyle(
+                              color: DLogColors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            '${contact.relationship}  •  ${contact.phone}',
+                            style: const TextStyle(
+                              color: DLogColors.grey,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  '${contact.relationship}  •  ${contact.phone}',
-                  style: const TextStyle(color: DLogColors.grey, fontSize: 11),
-                ),
-              ],
+              ),
             ),
           ),
           PopupMenuButton<String>(

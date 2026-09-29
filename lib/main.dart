@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 
 import 'firebase_options.dart';
 import 'theme/dlog_theme.dart';
+import 'theme/dlog_theme_controller.dart';
 import 'screens/splash/splash_screen.dart';
 import 'services/grace_period_notification_service.dart';
 
@@ -11,6 +12,7 @@ Future<void> main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await GracePeriodNotificationService.instance.initialize();
+  await DLogThemeController.instance.load();
 
   runApp(const MyApp());
 }
@@ -20,11 +22,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'DLog',
-      debugShowCheckedModeBanner: false,
-      theme: DLogTheme.darkTheme,
-      home: const SplashScreen(),
+    return AnimatedBuilder(
+      animation: DLogThemeController.instance,
+      builder: (context, _) => MaterialApp(
+        title: 'DLog',
+        debugShowCheckedModeBanner: false,
+        theme: DLogTheme.lightTheme,
+        darkTheme: DLogTheme.darkTheme,
+        themeMode: DLogThemeController.instance.themeMode,
+        home: const SplashScreen(),
+      ),
     );
   }
 }

@@ -4,14 +4,10 @@
 /// They are NOT manufacturer-mandated prices and should not be presented
 /// as guaranteed workshop prices.
 ///
-/// Sources include:
-/// - Current published Perodua scheduled-service pricing
-/// - Current published Proton scheduled-service pricing
-/// - Published Malaysian automotive/workshop pricing
-///
-/// Where a defensible vehicle-specific reference is not available,
-/// DLog intentionally leaves the range unavailable rather than inventing
-/// a number.
+/// Sources include published service pricing and the supplied DLog
+/// prototype average-pricing workbook. Prototype values fill only missing
+/// model/item entries and are represented as a point baseline, not a verified
+/// market range.
 
 class MaintenancePriceRange {
   final int low;
@@ -48,6 +44,11 @@ class MaintenancePriceData {
 class MaintenancePrices {
   MaintenancePrices._();
 
+  static const _prototypeAverageBasis =
+      'Prototype average mechanic price; shared across model variants';
+  static const _prototypePricingSource =
+      'DLog_Prototype_Maintenance_Average_Pricing.xlsx — Variant Pricing';
+
   // ------------------------------------------------------------
   // 1. ENGINE OIL & OIL FILTER
   // ------------------------------------------------------------
@@ -72,7 +73,8 @@ class MaintenancePrices {
       'X50': MaintenancePriceRange(
         low: 216,
         high: 399,
-        basis: 'Published Proton service pricing and current service-centre pricing',
+        basis:
+            'Published Proton service pricing and current service-centre pricing',
         source: 'Proton service package / Pantai Bharu published pricing',
       ),
 
@@ -89,17 +91,37 @@ class MaintenancePrices {
   // 2. BRAKE SYSTEM
   // ------------------------------------------------------------
   //
-  // Important:
-  // DLog treats the brake system as condition-based.
-  // There is no single universal replacement price because a quote
-  // could involve inspection, pads, discs/drums, brake fluid or
-  // several components together.
-  //
-  // We therefore do NOT invent a vehicle-wide "average".
-  //
+  // Brake quotes vary by the work included. These prototype averages are
+  // general demo baselines from the supplied workbook, not verified prices
+  // for a particular brake repair.
   static const brakeSystem = MaintenancePriceData(
     maintenanceItem: 'Brake System',
-    vehiclePrices: {},
+    vehiclePrices: {
+      'Saga': MaintenancePriceRange(
+        low: 180,
+        high: 180,
+        basis: _prototypeAverageBasis,
+        source: _prototypePricingSource,
+      ),
+      'Myvi': MaintenancePriceRange(
+        low: 180,
+        high: 180,
+        basis: _prototypeAverageBasis,
+        source: _prototypePricingSource,
+      ),
+      'Axia': MaintenancePriceRange(
+        low: 160,
+        high: 160,
+        basis: _prototypeAverageBasis,
+        source: _prototypePricingSource,
+      ),
+      'X50': MaintenancePriceRange(
+        low: 280,
+        high: 280,
+        basis: _prototypeAverageBasis,
+        source: _prototypePricingSource,
+      ),
+    },
   );
 
   // ------------------------------------------------------------
@@ -125,6 +147,18 @@ class MaintenancePrices {
         basis: 'Published current Malaysian tyre pricing for four tyres',
         source: 'Paultan / current Malaysian tyre pricing',
       ),
+      'Saga': MaintenancePriceRange(
+        low: 800,
+        high: 800,
+        basis: _prototypeAverageBasis,
+        source: _prototypePricingSource,
+      ),
+      'X50': MaintenancePriceRange(
+        low: 1100,
+        high: 1100,
+        basis: _prototypeAverageBasis,
+        source: _prototypePricingSource,
+      ),
     },
   );
 
@@ -132,13 +166,36 @@ class MaintenancePrices {
   // 4. TYRE ROTATION
   // ------------------------------------------------------------
   //
-  // Tyre rotation is generally a service/labour operation rather
-  // than a parts replacement. A reliable vehicle-specific public
-  // price database is not available in our current research set.
-  //
+  // Prototype average service charges from the supplied workbook fill this
+  // item where a published vehicle-specific range is unavailable.
   static const tyreRotation = MaintenancePriceData(
     maintenanceItem: 'Tyre Rotation',
-    vehiclePrices: {},
+    vehiclePrices: {
+      'Saga': MaintenancePriceRange(
+        low: 25,
+        high: 25,
+        basis: _prototypeAverageBasis,
+        source: _prototypePricingSource,
+      ),
+      'Myvi': MaintenancePriceRange(
+        low: 25,
+        high: 25,
+        basis: _prototypeAverageBasis,
+        source: _prototypePricingSource,
+      ),
+      'Axia': MaintenancePriceRange(
+        low: 25,
+        high: 25,
+        basis: _prototypeAverageBasis,
+        source: _prototypePricingSource,
+      ),
+      'X50': MaintenancePriceRange(
+        low: 30,
+        high: 30,
+        basis: _prototypeAverageBasis,
+        source: _prototypePricingSource,
+      ),
+    },
   );
 
   // ------------------------------------------------------------
@@ -164,6 +221,18 @@ class MaintenancePrices {
         basis: 'Published current X50 battery pricing by battery type',
         source: 'Current Malaysian X50 battery pricing',
       ),
+      'Saga': MaintenancePriceRange(
+        low: 250,
+        high: 250,
+        basis: _prototypeAverageBasis,
+        source: _prototypePricingSource,
+      ),
+      'Myvi': MaintenancePriceRange(
+        low: 230,
+        high: 230,
+        basis: _prototypeAverageBasis,
+        source: _prototypePricingSource,
+      ),
     },
   );
 
@@ -186,6 +255,18 @@ class MaintenancePrices {
         high: 140,
         basis: 'Published Proton coolant/component pricing',
         source: 'Current Proton maintenance pricing',
+      ),
+      'Axia': MaintenancePriceRange(
+        low: 75,
+        high: 75,
+        basis: _prototypeAverageBasis,
+        source: _prototypePricingSource,
+      ),
+      'Myvi': MaintenancePriceRange(
+        low: 80,
+        high: 80,
+        basis: _prototypeAverageBasis,
+        source: _prototypePricingSource,
       ),
     },
   );
@@ -210,6 +291,18 @@ class MaintenancePrices {
         basis: 'Published current Proton maintenance/component pricing',
         source: 'Current Proton maintenance pricing',
       ),
+      'Axia': MaintenancePriceRange(
+        low: 50,
+        high: 50,
+        basis: _prototypeAverageBasis,
+        source: _prototypePricingSource,
+      ),
+      'Myvi': MaintenancePriceRange(
+        low: 55,
+        high: 55,
+        basis: _prototypeAverageBasis,
+        source: _prototypePricingSource,
+      ),
     },
   );
 
@@ -223,14 +316,16 @@ class MaintenancePrices {
       'Axia': MaintenancePriceRange(
         low: 227,
         high: 485,
-        basis: 'Published Axia scheduled-service pricing where CVT fluid is included',
+        basis:
+            'Published Axia scheduled-service pricing where CVT fluid is included',
         source: 'Current Perodua scheduled-service pricing / Paultan 2026',
       ),
 
       'Myvi': MaintenancePriceRange(
         low: 438,
         high: 728,
-        basis: 'Published Myvi scheduled-service pricing where transmission fluid is included',
+        basis:
+            'Published Myvi scheduled-service pricing where transmission fluid is included',
         source: 'Current Perodua scheduled-service pricing / Paultan 2026',
       ),
 

@@ -856,23 +856,6 @@ class _MaintenanceListScreenState extends State<MaintenanceListScreen> {
                     _openRecordService();
                   },
                 ),
-                const SizedBox(height: 10),
-                _addMenuOption(
-                  icon: Icons.add_task_rounded,
-                  title: 'ADD MAINTENANCE',
-                  subtitle: 'Add a maintenance item to this vehicle',
-                  color: const Color(0xFFCE5274),
-                  onTap: () {
-                    Navigator.of(sheetContext).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Custom maintenance is not connected to the vehicle rule set yet.',
-                        ),
-                      ),
-                    );
-                  },
-                ),
               ],
             ),
           ),
